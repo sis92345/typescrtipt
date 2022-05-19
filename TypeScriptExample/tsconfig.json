@@ -1,0 +1,21 @@
+{
+  "compilerOptions" : {
+    // lib : TypeScriptCompiler( 이하 TSC )가 코그 실행 환경에서 이용할 수 있다고 가정하는 API
+    "lib" : [ "es2020" ],
+    // module : TSC가 코드를 컴파일할 대상 모듈 시스템
+    "module": "commonjs",
+    // outDir : 생성된 자바스크립트 코드를 출력할 디렉토린
+    "outDir": "dist",
+    "sourceMap" : true,
+    // strict : 유효하지 않은 코드를 확인할 때 엄격 검사를 진핼할 지 여분
+    "strict" : true,
+    // 암묵적 any를 사용할 수 없음
+    "noImplicitAny": true,
+    // TSC가 컴파일할 자바스크립트의 버전
+    "target": "ES2020",
+  },
+  // include : TSC가 타입스크립트 파일을 찾을 디렉터리
+  "include": [
+    "src_ts"
+  ]
+}
