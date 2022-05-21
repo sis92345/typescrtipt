@@ -78,6 +78,96 @@ const showMessageAllWithSigniture = function (  messageDisplay : showMessage , .
 }
 
 
+// 오버로드
+type showMessageOverload = {
+    ( message : string ) : void
+    ( message : string , userId : string ) : void
+}
+
+const showMessageByUserid : showMessageOverload  = function ( message : string, userIdOrVoid : string | void  = "익명") : void {
+
+    // userId 있을 시 구현
+    if ( typeof userIdOrVoid === "undefined") {
+        showMessageWithContextual( message );
+    }
+    else {
+        showMessageWithContextual( message , userIdOrVoid );
+    }
+    // userId 없을 시 구현
+}
+
+/** 다형성 */
+
+// 1. 제너릭을 사용하지 않은 형태 : 이 경우 객체로 넘길경우 object이기 때문에 받을수는 있지만 프로퍼티 접근이 불가능함
+type FilterWithNotGeneric = {
+    (array : number[], f: (item:number) => boolean )  : number[] ,
+    (array : string[], f: (item:string) => boolean )  : string[] ,
+    (array : object[], f: (item:object) => boolean )  : object[] ,
+}
+
+const func1 : FilterWithNotGeneric = function ( array : any[] , f: ( _ : any) => boolean) {
+
+    return array;
+}
+
+func1( [ "an" , "doc" ] , _ => _ === "an" )
+
+
+// 2. 제너릭을 사용한 함수 시그니쳐 정의
+// 제너릭 : 함수나 클래스 내부가 아닌 외부 사용자에 의해 타입이 지정되는 것, 즉 선언 시점이 아닌 사용 시점에 타입이 지정된다.
+// 제너릭을 사용할 경우 ()앞에 <T>를 붙인다.
+
+type FilterWithGeneric = {
+    <T>( array : T[] , f : ( item : T ) => boolean ) : T[]
+}
+
+// <?>의 위치마다 제너릭의 타입 한정 위치가 달라진다.
+type FilterWithGenericTypeAlias<T>= ( array : T[] , f : ( item : T ) => boolean ) => T[]
+
+// 함수 정의시에도 사용할 수 있다.
+function map<T,U>( array : T[] , f : ( item : T ) => U ) : U[] {
+
+    let result = [];
+
+    for ( let i = 0; i < array.length ; i++ ) {
+
+        result[i] = f(array[i]);
+    }
+
+    return result;
+}
+
+const filterFunction : FilterWithGeneric = function ( array  , func ) {
+
+    let result = [];
+
+    for ( let i = 0; i < array.length ; i++ ) {
+
+        const item = array[i];
+
+        if ( func(item) ) {
+            result.push(item);
+        }
+    }
+
+    return result;
+}
+
+const filterFunctionWithGenericTypeAlise : FilterWithGenericTypeAlias<number> = function ( array , func ) {
+
+    let result = [];
+
+    for ( let i = 0; i < array.length ; i++ ) {
+
+        const item = array[i];
+
+        if ( func(item) ) {
+            result.push(item);
+        }
+    }
+
+    return result;
+}
 
 console.log( "나의 첫번째 타입스크립트 함수 " , adder( 1 , 2 ) );
 console.log( "빼기 " , minus( 1 , 2 ) );
@@ -86,15 +176,32 @@ greeting1( { name : "an" , greeting : " hello" } );
 console.log( greeting2( "kim" ) )
 showMessage( "옵션 값이 없습니다." );
 showMessage( "옵션 값이 없습니다." , "김진표" );
+
+// 함수 시그니쳐 정의
 showMessageAll( showMessage , "안녕" , "Hello" , "곤니치와" );
 showMessageAllWithSigniture( showMessageWithDefault , "도쿄" , "런던" , "파리" );
 showMessageAllWithSigniture( showMessageWithContextual , "도쿄" , "런던" , "파리" );
 
+// 오버로드
+showMessageByUserid( "안녕" )
+showMessageByUserid( "안녕" , "김땡땡" )
+
+// 제너레이터 함수
 const fibonacci = generator();
 fibonacci.next();
 fibonacci.next();
 fibonacci.next();
 console.log( fibonacci.next() );
+
+console.log( filterFunction( [ {name : "an"} , {name : "kim"} ] , _ => _.name === "an" ) );
+console.log( filterFunctionWithGenericTypeAlise( [ 1 , 2 , 3 , 4 , 5 ] , _ => _ >= 3) );
+
+const mapResult = map( [ 1 , 2 ,3 ] , _ => { return _ + 3 } ); // <number,number>
+const mapResult2 = map<number , string>( [ 1 , 2 ,3 ] , _ => { return _ + "3" } ); // <number,string>
+
+// 제너릭은 제너릭 위치에 기초하여 적절한 구체 타입을 한정한다. 아래는 T[]를 string[]으로 한정하였으므로
+// Property 'name' does not exist on type 'string'.오류가 발생한다.
+//console.log( filterFunction( [ "an" , "doc" ] , _ => _.name === "an" ) );
 /** 오류 모음 */
 
 /**
