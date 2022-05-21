@@ -169,6 +169,77 @@ const filterFunctionWithGenericTypeAlise : FilterWithGenericTypeAlias<number> = 
     return result;
 }
 
+/** 다형성 */
+type user = {
+    userId : string,
+    showMe : () => void,
+}
+type staffUser = user & {
+    personalNo : string
+
+}
+
+type normalUser = user & {
+    googleId : string
+}
+
+type property = {
+    properties : string[],
+    showProperty : ( item : string ) => void
+}
+
+const user1 : user & property = {
+    userId : "1",
+    showMe : () => {console.log( "나는 유저!" )},
+    properties: [ "서울" ],
+    showProperty : ( pro ) => { console.log( pro ) }
+}
+const user2 : staffUser & property = {
+    userId : "2",
+    personalNo: "",
+    showMe() { console.log( "나는 스테프 유저!" ) },
+    properties: [ "대구" ],
+    showProperty : ( pro ) => { console.log( pro ) }
+}
+
+const user3 : normalUser & property = {
+    userId : "1",
+    googleId : "12",
+    showMe() { console.log( "나는 스테프 유저!" ); },
+    properties: [ "부산" ],
+    showProperty : ( pro ) => { console.log( pro ) }
+}
+
+/** VOID 처리! */
+// void 함수에 return은 자유롭게 할 수 있지만, void 람수로 값을 받은 변수는 void 타입이 되므로 사용할 수 없다.
+type test2 = ( item : string ) => void;
+
+const abcd : test2 = ( item ) => 1;
+
+console.log( "+++++++++++++ TYPE!" )
+const isVoid = abcd( "1" );
+
+// TS2365: Operator '+' cannot be applied to types 'void' and 'number'.
+// isVoid + 3;
+console.log( isVoid )
+// 일반 타입은 안됨 : T 제너릭이 객체일 경우 어떤 타입이 올지 모르니까 오류
+// function showId <T> ( user : T ) : void {
+//     console.log( user.userId )
+// }
+
+// user를 상속받는 모든 타입을 받을 수 았다.
+
+function showId<T extends user > ( user : T ) : void {
+    user.showMe();
+}
+
+function showIdWithProperty <T extends user & property > ( user : T ) : void {
+    user.showMe();
+    user.showProperty( user.properties[0] );
+}
+
+
+
 console.log( "나의 첫번째 타입스크립트 함수 " , adder( 1 , 2 ) );
 console.log( "빼기 " , minus( 1 , 2 ) );
 console.log( "곱하기" , multiple( 1 , 2 ) );
@@ -198,6 +269,13 @@ console.log( filterFunctionWithGenericTypeAlise( [ 1 , 2 , 3 , 4 , 5 ] , _ => _ 
 
 const mapResult = map( [ 1 , 2 ,3 ] , _ => { return _ + 3 } ); // <number,number>
 const mapResult2 = map<number , string>( [ 1 , 2 ,3 ] , _ => { return _ + "3" } ); // <number,string>
+
+showIdWithProperty( user1 );
+showIdWithProperty( user2 );
+showIdWithProperty( user3 );
+
+// 덕타이핑
+showId( { userId : "해킹 유저", showMe : () => {console.log( "나는 오리" )} } )
 
 // 제너릭은 제너릭 위치에 기초하여 적절한 구체 타입을 한정한다. 아래는 T[]를 string[]으로 한정하였으므로
 // Property 'name' does not exist on type 'string'.오류가 발생한다.
